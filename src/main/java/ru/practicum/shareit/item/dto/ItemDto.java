@@ -5,7 +5,6 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 
 @Data
 @NoArgsConstructor
@@ -17,8 +16,7 @@ public class ItemDto {
     @NotBlank
     private String description;
     @NotNull
-    @Pattern(regexp = "^true$|^false$", message = "allowed input: true or false")
-    private String available;
+    private Boolean available;
     private Long owner;
     private Long request;
 

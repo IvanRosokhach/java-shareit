@@ -10,14 +10,14 @@ public interface ItemService {
 
     Item create(long userId, ItemDto itemDto);
 
-    Item read(long userId, long id);
+    Item read(long userId, long itemId);
 
     Collection<Item> readAll(long userId);
 
     Item update(long userId, long itemId, ItemDto itemDto);
 
-    void delete(long id);
+    void delete(long userId, long itemId);
 
-    List<Item> search(String text);
+    List<Item> search(long userId, String text);
 
 }

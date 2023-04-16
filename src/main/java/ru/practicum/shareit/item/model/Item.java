@@ -20,7 +20,5 @@ public class Item {
     private boolean available;
     private Long owner;
     private ItemRequest request;
-    // — если вещь была создана по запросу другого пользователя,
-    // то в этом поле будет храниться ссылка на соответствующий запрос.
 
 }

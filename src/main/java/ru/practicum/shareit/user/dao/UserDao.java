@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exception.EmailExistException;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.user.UserMapper;
+import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.Collection;
@@ -16,71 +18,66 @@ public class UserDao {
     private long lastId = 0;
     private final Map<Long, User> users = new HashMap<>();
 
-    public User create(User user) {
-        checkEmail(user);
+    public User create(UserDto userDto) {
+        User user = UserMapper.toUser(userDto);
+        if (checkEmail(user)) {
+            log.warn("Пользователь с email: {} уже существует.", user.getEmail());
+            throw new EmailExistException("Email duplicate error");
+        }
         user.setId(getId());
         users.put(user.getId(), user);
+        log.debug("Пользователь создан.");
         return user;
     }
 
-    public User read(long id) {
-        return users.get(id);
+    public User read(long userId) {
+        log.debug("Пользователь с id: {} найден.", userId);
+        return users.get(userId);
     }
 
     public Collection<User> readAll() {
+        log.debug("Всего пользователей: {}.", users.values().size());
         return users.values();
     }
 
-    public User update(long id, User user) {
-        isExist(id);
-        User updatedUser = users.get(id);
-
-        if (user.getName() != null) {
-            updatedUser.setName(user.getName());
-        }
+    public User update(long userId, User user) {
+        isExist(userId);
+        User updatedUser = users.get(userId);
         if (user.getEmail() != null) {
-            users.remove(id);
-//            try {
-//                checkEmail(user);
-//            } catch (EmailExistException e) {
-            if (checkEmailBool(user)) {
+            users.remove(userId);
+            if (checkEmail(user)) {
                 users.put(updatedUser.getId(), updatedUser);
+                log.warn("Пользователь с email: {} уже существует.", user.getEmail());
                 throw new EmailExistException("Email duplicate error");
             }
             updatedUser.setEmail(user.getEmail());
-            users.put(updatedUser.getId(), updatedUser);
         }
+        if (user.getName() != null) {
+            updatedUser.setName(user.getName());
+        }
+        users.put(updatedUser.getId(), updatedUser);
+        log.debug("Пользователь с id: {} обновлен.", userId);
         return updatedUser;
     }
 
-    public void delete(long id) {
-        isExist(id);
-        users.remove(id);
+    public void delete(long userId) {
+        isExist(userId);
+        users.remove(userId);
+        log.debug("Пользователь с id: {} удален.", userId);
     }
 
     private long getId() {
-//        long lastId = users.values().stream()
-//                .mapToLong(User::getId)
-//                .max()
-//                .orElse(0);
         return ++lastId;
     }
 
     public void isExist(long userId) {
         if (!users.containsKey(userId)) {
+            log.warn("Пользователь с id: {} не найден.", userId);
             throw new NotFoundException("User not found");
         }
     }
 
-    private void checkEmail(User user) throws RuntimeException {
-        if (users.values()
-                .stream().map(User::getEmail)
-                .anyMatch(email -> email.equals(user.getEmail()))) {
-            throw new EmailExistException("Email error");
-        }
-    }
-
-    private boolean checkEmailBool(User user) {
+    private boolean checkEmail(User user) {
         return users.values()
                 .stream().map(User::getEmail)
                 .anyMatch(email -> email.equals(user.getEmail()));

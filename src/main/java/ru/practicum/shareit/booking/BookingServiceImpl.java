@@ -2,13 +2,16 @@ package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.dao.BookingDao;
 import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.model.Booking;
 
 import java.util.Collection;
 
 @Service
 @RequiredArgsConstructor
 public class BookingServiceImpl implements BookingService {
+    private final BookingDao bookingDao;
 
     @Override
     public Booking create(long userId, BookingDto bookingDto) {
@@ -31,7 +34,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public void delete(long bookingId) {
+    public void delete(long userId, long bookingId) {
 
     }
 
