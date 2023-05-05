@@ -5,7 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.service.UserMapper;
+import ru.practicum.shareit.user.service.UserService;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 @RequestMapping(path = "/users")
 @RequiredArgsConstructor
 public class UserController {
+
     private final UserService userService;
 
     @PostMapping
@@ -36,9 +38,10 @@ public class UserController {
     }
 
     @PatchMapping("/{userId}")
-    public UserDto update(@PathVariable long userId, @RequestBody User user) {
+    public UserDto update(@PathVariable long userId,
+                          @RequestBody UserDto userDto) {
         log.debug("{} update({})", this.getClass().getName(), userId);
-        return UserMapper.toUserDto(userService.update(userId, user));
+        return UserMapper.toUserDto(userService.update(userId, userDto));
     }
 
     @DeleteMapping("/{userId}")

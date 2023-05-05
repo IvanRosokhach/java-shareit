@@ -1,10 +1,12 @@
 package ru.practicum.shareit.booking.dto;
 
 import lombok.Data;
+import ru.practicum.shareit.booking.model.BookingStatus;
+import ru.practicum.shareit.item.dto.ShortItemDto;
+import ru.practicum.shareit.user.dto.ShortUserDto;
 
 import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 import java.time.LocalDateTime;
 
 @Data
@@ -18,11 +20,9 @@ public class BookingDto {
     @FutureOrPresent
     private LocalDateTime end;
     @NotNull
-    private Long item;
-    @NotNull
-    private Long booker;
-    @NotNull
-    @Pattern(regexp = "^WAITING$|^APPROVED$|^REJECTED$|^CANCELED$",
-            message = "allowed input: WAITING/APPROVED/REJECTED/CANCELED")
-    private String status;
+    private Long itemId;
+
+    private BookingStatus status;
+    private ShortUserDto booker;
+    private ShortItemDto item;
 }
