@@ -1,11 +1,10 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.exception.NotAvailableException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.NotOwnerException;
 import ru.practicum.shareit.exception.UncompletedBookingException;
@@ -23,7 +22,8 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.exception.Constant.*;
+import static ru.practicum.shareit.exception.Constant.NOT_FOUND_ITEM;
+import static ru.practicum.shareit.exception.Constant.NOT_FOUND_USER;
 
 @Slf4j
 @Service
