@@ -25,20 +25,20 @@ public class ItemController {
     @PostMapping
     public ItemDto create(@RequestHeader("X-Sharer-User-Id") Long userId,
                           @RequestBody @Validated ItemDto itemDto) {
-        log.debug("{} create", this.getClass().getName());
+        log.debug("Create");
         return ItemMapper.toItemDto(itemService.create(userId, itemDto));
     }
 
     @GetMapping("/{itemId}")
     public ItemDto read(@RequestHeader("X-Sharer-User-Id") Long userId,
                         @PathVariable long itemId) {
-        log.debug("{} read", this.getClass().getName());
+        log.debug("Read");
         return itemService.read(userId, itemId);
     }
 
     @GetMapping
     public Collection<ItemDto> readAll(@RequestHeader("X-Sharer-User-Id") Long userId) {
-        log.debug("{} readAll", this.getClass().getName());
+        log.debug("ReadAll");
         return itemService.readAll(userId);
     }
 
@@ -46,21 +46,21 @@ public class ItemController {
     public ItemDto update(@RequestHeader("X-Sharer-User-Id") Long userId,
                           @PathVariable long itemId,
                           @RequestBody ItemDto itemDto) {
-        log.debug("{} update", this.getClass().getName());
+        log.debug("Update({})", itemId);
         return ItemMapper.toItemDto(itemService.update(userId, itemId, itemDto));
     }
 
     @DeleteMapping("/{itemId}")
     public void delete(@RequestHeader("X-Sharer-User-Id") Long userId,
                        @PathVariable long itemId) {
-        log.debug("{} delete({})", this.getClass().getName(), itemId);
+        log.debug("Delete({})", itemId);
         itemService.delete(userId, itemId);
     }
 
     @GetMapping("/search")
     public List<ItemDto> search(@RequestHeader("X-Sharer-User-Id") Long userId,
                                 @RequestParam String text) {
-        log.debug("{} search({})", this.getClass().getName(), text);
+        log.debug("Search({})", text);
         return itemService.search(userId, text).stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
     }
 
@@ -68,6 +68,7 @@ public class ItemController {
     public CommentDto createComment(@RequestHeader("X-Sharer-User-Id") Long userId,
                                     @PathVariable long itemId,
                                     @RequestBody @Validated CommentDto commentDto) {
+        log.debug("{}/CreateComment()", itemId);
         return CommentMapper.toCommentDto(itemService.createComment(userId, itemId, commentDto));
     }
 
