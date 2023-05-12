@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
@@ -14,6 +15,7 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.repository.RequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -22,8 +24,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.exception.Constant.NOT_FOUND_ITEM;
-import static ru.practicum.shareit.exception.Constant.NOT_FOUND_USER;
+import static ru.practicum.shareit.exception.Constant.*;
 
 @Slf4j
 @Service
@@ -34,15 +35,19 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final RequestRepository requestRepository;
 
-    public Item create(long userId, ItemDto itemDto) {
+    public ItemDto create(long userId, ItemDto itemDto) {
         Item item = ItemMapper.toItem(itemDto);
         item.setOwner(userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(String.format(NOT_FOUND_USER, userId))));
-
+        if (itemDto.getRequestId() != null) {
+            item.setRequest(requestRepository.findById(itemDto.getRequestId())
+                    .orElseThrow(() -> new NotFoundException(String.format(NOT_FOUND_ITEM_REQUEST, itemDto.getRequestId()))));
+        }
         Item savedItem = itemRepository.save(item);
         log.debug("Вещь добавлена с id: {}.", savedItem.getId());
-        return savedItem;
+        return ItemMapper.toItemDto(savedItem);
     }
 
     public ItemDto read(long userId, long itemId) {
@@ -61,8 +66,9 @@ public class ItemServiceImpl implements ItemService {
         return itemDto;
     }
 
-    public Collection<ItemDto> readAll(long userId) {
-        Map<Long, Item> itemsByOwner = itemRepository.findAllByOwnerId(userId)
+    public Collection<ItemDto> readAll(long userId, int from, int size) {
+        PageRequest page = PageRequest.of(from / size, size);
+        Map<Long, Item> itemsByOwner = itemRepository.findAllByOwnerId(userId, page)
                 .stream().collect(Collectors.toMap(Item::getId, Function.identity()));
 
         Map<Long, List<Booking>> bookingsByItems = bookingRepository.findAllByItemIdIn(itemsByOwner.keySet())
@@ -80,7 +86,7 @@ public class ItemServiceImpl implements ItemService {
         return collect;
     }
 
-    public Item update(long userId, long itemId, ItemDto itemDto) {
+    public ItemDto update(long userId, long itemId, ItemDto itemDto) {
         Item item = ItemMapper.toItem(itemDto);
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException(String.format(NOT_FOUND_USER, userId));
@@ -101,7 +107,7 @@ public class ItemServiceImpl implements ItemService {
         }
         Item saved = itemRepository.save(updatedItem);
         log.debug("Вещь с id: {} обновлена.", itemId);
-        return saved;
+        return ItemMapper.toItemDto(saved);
 
     }
 
@@ -118,16 +124,17 @@ public class ItemServiceImpl implements ItemService {
         log.debug("Вещь с id: {} удалена.", itemId);
     }
 
-    public Collection<Item> search(long userId, String text) {
+    public Collection<ItemDto> search(long userId, String text, int from, int size) {
         if (text.isBlank() || text.isEmpty()) {
             return List.of();
         }
-        Collection<Item> searched = itemRepository.search(text);
+        PageRequest page = PageRequest.of(from / size, size);
+        Collection<Item> searched = itemRepository.search(text, page);
         log.debug("Вещей найден: {}.", searched.size());
-        return searched;
+        return ItemMapper.toItemDto(searched);
     }
 
-    public Comment createComment(long userId, long itemId, CommentDto commentDto) {
+    public CommentDto createComment(long userId, long itemId, CommentDto commentDto) {
         Comment comment = CommentMapper.toComment(commentDto);
         User user = userRepository.findById(userId).orElseThrow();
         Item item = itemRepository.findById(itemId).orElseThrow();
@@ -142,7 +149,7 @@ public class ItemServiceImpl implements ItemService {
         comment.setCreated(time);
         Comment savedComment = commentRepository.save(comment);
         log.debug("Комментарий с id: {} сохранен.", savedComment.getId());
-        return comment;
+        return CommentMapper.toCommentDto(comment);
     }
 
 }

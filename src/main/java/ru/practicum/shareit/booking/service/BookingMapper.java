@@ -6,6 +6,9 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.service.ItemMapper;
 import ru.practicum.shareit.user.service.UserMapper;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 public class BookingMapper {
 
     private BookingMapper() {
@@ -21,6 +24,10 @@ public class BookingMapper {
         bookingDto.setItemId(booking.getItem().getId());
         bookingDto.setItem(ItemMapper.toShortItem(booking.getItem()));
         return bookingDto;
+    }
+
+    public static Collection<BookingDto> toBookingDto(Collection<Booking> bookings) {
+        return bookings.stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
     }
 
     public static ShortBookingDto toShortBookingDto(Booking booking) {

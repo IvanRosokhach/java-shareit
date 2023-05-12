@@ -1,5 +1,6 @@
 package ru.practicum.shareit.booking.repository;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -17,49 +18,44 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     Collection<Booking> findAllByBookerIdAndItemIdAndEndIsBefore(Long bookerId, Long itemId, LocalDateTime time);
 
-    Collection<Booking> findAllByBookerIdOrderByStartDesc(Long booker);
+    Collection<Booking> findAllByBookerId(Long booker, PageRequest page);
 
-    Collection<Booking> findAllByBookerIdAndStartAfterOrderByStartDesc(Long booker, LocalDateTime time);
+    Collection<Booking> findAllByBookerIdAndStartAfter(Long booker, LocalDateTime time, PageRequest page);
 
-    Collection<Booking> findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(Long booker, LocalDateTime time1, LocalDateTime time2);
+    Collection<Booking> findAllByBookerIdAndStartBeforeAndEndAfter(Long booker, LocalDateTime time1, LocalDateTime time2, PageRequest page);
 
-    Collection<Booking> findAllByBookerIdAndEndBeforeOrderByStartDesc(Long booker, LocalDateTime time);
+    Collection<Booking> findAllByBookerIdAndEndBefore(Long booker, LocalDateTime time, PageRequest page);
 
-    Collection<Booking> findAllByBookerIdAndStatusOrderByStartDesc(Long booker, BookingStatus state);
+    Collection<Booking> findAllByBookerIdAndStatus(Long booker, BookingStatus state, PageRequest page);
 
     @Query("select b from Booking b " +
             "where b.item in (select i.id from Item i " +
-            "where i.owner.id = ?1) " +
-            "order by b.start DESC")
-    Collection<Booking> findAllForOwner(Long owner);
+            "where i.owner.id = ?1)")
+    Collection<Booking> findAllForOwner(Long owner, PageRequest page);
 
     @Query("select b from Booking b " +
             "where b.status =?1 " +
             "and b.item in (select i.id from Item i " +
-            "where i.owner.id = ?2) " +
-            "order by b.start DESC")
-    Collection<Booking> findAllForOwnerState(BookingStatus state, Long owner);
+            "where i.owner.id = ?2)")
+    Collection<Booking> findAllForOwnerState(BookingStatus state, Long owner, PageRequest page);
 
     @Query("select b from Booking b " +
             "where b.item in (select i.id from Item i " +
             "where i.owner.id = ?1) " +
-            "and b.end <?2 " +
-            "order by b.start DESC")
-    Collection<Booking> findAllForOwnerPast(Long itemId, LocalDateTime time);
+            "and b.end <?2")
+    Collection<Booking> findAllForOwnerPast(Long itemId, LocalDateTime time, PageRequest page);
 
     @Query("select b from Booking b " +
             "where b.item in (select i.id from Item i " +
             "where i.owner.id = ?1) " +
             "and b.start <?2 " +
-            "and b.end>?2  " +
-            "order by b.start DESC")
-    Collection<Booking> findAllForOwnerCurrent(Long itemId, LocalDateTime time);
+            "and b.end>?2")
+    Collection<Booking> findAllForOwnerCurrent(Long itemId, LocalDateTime time, PageRequest page);
 
     @Query("select b from Booking b " +
             "where b.item in (select i.id from Item i " +
             "where i.owner.id = ?1) " +
-            "and b.start >?2 " +
-            "order by b.start DESC")
-    Collection<Booking> findAllForOwnerFuture(Long itemId, LocalDateTime time);
+            "and b.start >?2")
+    Collection<Booking> findAllForOwnerFuture(Long itemId, LocalDateTime time, PageRequest page);
 
 }
