@@ -30,8 +30,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto read(long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(String.format(NOT_FOUND_USER, userId)));
+        User user = getUserById(userId);
         log.debug("Пользователь с id: {} найден.", userId);
         return UserMapper.toUserDto(user);
     }
@@ -39,7 +38,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Collection<UserDto> readAll() {
         List<User> allUsers = userRepository.findAll();
-        log.debug("Всего пользователей: {}.", allUsers.size());
+        log.debug("Всего пользователей найдено: {}.", allUsers.size());
         return UserMapper.listToUserDto(allUsers);
     }
 
@@ -47,8 +46,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto update(long userId, UserDto userDto) {
         User user = UserMapper.toUser(userDto);
-        User userForUpdate = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(String.format(NOT_FOUND_USER, userId)));
+        User userForUpdate = getUserById(userId);
 
         if (user.getEmail() != null) {
             userForUpdate.setEmail(user.getEmail());
@@ -63,11 +61,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void delete(long userId) {
+        userIsExist(userId);
+        userRepository.deleteById(userId);
+        log.debug("Пользователь с id: {} удален.", userId);
+    }
+
+    @Override
+    public void userIsExist(long userId) {
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException(String.format(NOT_FOUND_USER, userId));
         }
-        userRepository.deleteById(userId);
-        log.debug("Пользователь с id: {} удален.", userId);
+    }
+
+    @Override
+    public User getUserById(long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(String.format(NOT_FOUND_USER, userId)));
     }
 
 }

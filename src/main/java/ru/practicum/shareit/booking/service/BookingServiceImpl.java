@@ -15,14 +15,14 @@ import ru.practicum.shareit.exception.NotAvailableException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.NotOwnerException;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
 
-import static ru.practicum.shareit.exception.Constant.*;
+import static ru.practicum.shareit.exception.Constant.NOT_FOUND_BOOKING;
 
 @Slf4j
 @Service
@@ -30,8 +30,8 @@ import static ru.practicum.shareit.exception.Constant.*;
 public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
-    private final ItemRepository itemRepository;
-    private final UserRepository userRepository;
+    private final ItemService itemService;
+    private final UserService userService;
 
     @Override
     public BookingDto create(long userId, BookingDto bookingDto) {
@@ -39,13 +39,11 @@ public class BookingServiceImpl implements BookingService {
         if (booking.getEnd().isBefore(booking.getStart()) || booking.getEnd().isEqual(booking.getStart())) {
             throw new IncorrectDateTimeException();
         }
-        Item item = itemRepository.findById(bookingDto.getItemId())
-                .orElseThrow(() -> new NotFoundException(String.format(NOT_FOUND_ITEM, bookingDto.getItemId())));
-        if (!item.getAvailable()) {
+        Item item = itemService.getItemById(bookingDto.getItemId());
+        if (item.getAvailable().equals(false)) {
             throw new NotAvailableException("Не доступна для бронирования.");
         }
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(String.format(NOT_FOUND_USER, userId)));
+        User user = userService.getUserById(userId);
         if (user.getId() == item.getOwner().getId()) {
             throw new NotFoundException("Пользователь является владельцем вещи.");
         }
@@ -59,28 +57,22 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDto read(long userId, long bookingId) {
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new NotFoundException(String.format(NOT_FOUND_BOOKING, bookingId)));
+        Booking booking = getBookingById(bookingId);
         if (booking.getBooker().getId() == userId || booking.getItem().getOwner().getId() == userId) {
             log.debug("Бронирование с id: {} найдено.", bookingId);
             return BookingMapper.toBookingDto(booking);
         } else {
-            throw new NotOwnerException();
+            throw new NotOwnerException("Пользователь не владелец/бронирующий вещи");
         }
     }
 
     @Override
     public Collection<BookingDto> readAll(long userId, BookingState state, int from, int size) {
-        if (!userRepository.existsById(userId)) {
-            throw new NotFoundException(String.format(NOT_FOUND_USER, userId));
-        }
+        userService.userIsExist(userId);
         PageRequest page = PageRequest.of(from / size, size, Sort.by("start").descending());
         final LocalDateTime time = LocalDateTime.now();
         Collection<Booking> bookings;
         switch (state) {
-            case ALL:
-                bookings = bookingRepository.findAllByBookerId(userId, page);
-                break;
             case FUTURE:
                 bookings = bookingRepository.findAllByBookerIdAndStartAfter(userId, time, page);
                 break;
@@ -95,15 +87,15 @@ public class BookingServiceImpl implements BookingService {
                 bookings = bookingRepository.findAllByBookerIdAndStatus(userId, BookingStatus.valueOf(state.toString()), page);
                 break;
             default:
-                throw new NotAvailableException("Unknown state: " + state);
+                bookings = bookingRepository.findAllByBookerId(userId, page);
+                break;
         }
         log.debug("Всего бронирований: {}.", bookings.size());
         return BookingMapper.toBookingDto(bookings);
     }
 
     public BookingDto updateStatus(long userId, long bookingId, boolean approved) {
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new NotFoundException(String.format(NOT_FOUND_BOOKING, bookingId)));
+        Booking booking = getBookingById(bookingId);
         if (booking.getItem().getOwner().getId() != userId) {
             throw new NotOwnerException();
         }
@@ -118,8 +110,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public void delete(long userId, long bookingId) {
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new NotFoundException(String.format(NOT_FOUND_BOOKING, bookingId)));
+        Booking booking = getBookingById(bookingId);
         if (booking.getBooker().getId() != userId) {
             throw new NotOwnerException();
         } else {
@@ -129,9 +120,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     public Collection<BookingDto> readForOwner(long userId, BookingState state, int from, int size) {
-        if (!userRepository.existsById(userId)) {
-            throw new NotFoundException(String.format(NOT_FOUND_USER, userId));
-        }
+        userService.userIsExist(userId);
         Collection<Booking> bookings;
         PageRequest page = PageRequest.of(from / size, size, Sort.by("start").descending());
         LocalDateTime time = LocalDateTime.now();
@@ -155,6 +144,11 @@ public class BookingServiceImpl implements BookingService {
         }
         log.debug("Всего бронирований: {} для владельца вещи с id {}.", bookings.size(), userId);
         return BookingMapper.toBookingDto(bookings);
+    }
+
+    private Booking getBookingById(long bookingId) {
+        return bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new NotFoundException(String.format(NOT_FOUND_BOOKING, bookingId)));
     }
 
 }

@@ -9,10 +9,10 @@ import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.service.ItemMapper;
-import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.repository.RequestRepository;
-import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -23,22 +23,20 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.exception.Constant.NOT_FOUND_ITEM_REQUEST;
-import static ru.practicum.shareit.exception.Constant.NOT_FOUND_USER;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class RequestServiceImpl implements RequestService {
 
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final ItemRepository itemRepository;
     private final RequestRepository requestRepository;
 
     @Override
     public ItemRequestDto create(Long userId, ItemRequestDto itemRequestDto) {
         ItemRequest itemRequest = RequestMapper.toRequest(itemRequestDto);
-        itemRequest.setRequestor(userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(String.format(NOT_FOUND_USER, userId))));
+        itemRequest.setRequestor(userService.getUserById(userId));
         itemRequest.setCreated(LocalDateTime.now());
         ItemRequest saved = requestRepository.save(itemRequest);
         log.debug("Запрос вещи создан.");
@@ -47,31 +45,25 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public List<ItemRequestDto> read(Long userId) {
-        if (!userRepository.existsById(userId)) {
-            throw new NotFoundException(String.format(NOT_FOUND_USER, userId));
-        }
+        userService.userIsExist(userId);
         Map<Long, ItemRequest> collectItemRequest = requestRepository.findAllByRequestorId(userId)
                 .stream().collect(Collectors.toMap(ItemRequest::getId, Function.identity()));
 
         Map<Long, List<Item>> collectItem = itemRepository.findAllByRequestRequestorId(userId)
                 .stream().collect(Collectors.groupingBy(item -> item.getRequest().getId()));
 
-        List<ItemRequestDto> itemRequestDtos = collectItemRequest.values().stream()
+        List<ItemRequestDto> itemRequestDto = collectItemRequest.values().stream()
                 .map(itemRequest -> RequestMapper.toRequestDto(itemRequest,
                         collectItem.getOrDefault(itemRequest.getRequestor().getId(), Collections.emptyList())))
                 .collect(Collectors.toList());
-        log.debug("Найдено запросов вещей: {}.", itemRequestDtos.size());
-        return itemRequestDtos;
+        log.debug("Найдено запросов вещей: {}.", itemRequestDto.size());
+        return itemRequestDto;
     }
 
     @Override
     public ItemRequestDto read(Long userId, Long requestId) {
-        if (!userRepository.existsById(userId)) {
-            throw new NotFoundException(String.format(NOT_FOUND_USER, userId));
-        }
-        ItemRequest itemRequest = requestRepository.findById(requestId)
-                .orElseThrow(() -> new NotFoundException(String.format(NOT_FOUND_ITEM_REQUEST, requestId)));
-
+        userService.userIsExist(userId);
+        ItemRequest itemRequest = getItemRequestById(requestId);
         Collection<Item> allByRequestId = itemRepository.findAllByRequestId(itemRequest.getId());
         ItemRequestDto itemRequestDto = RequestMapper.toRequestDto(itemRequest, allByRequestId);
         log.debug("Запрос вещи с id: {} найден.", requestId);
@@ -81,8 +73,8 @@ public class RequestServiceImpl implements RequestService {
     @Override
     public List<ItemRequestDto> readAll(Long userId, int from, int size) {
         PageRequest page = PageRequest.of(from, size, Sort.by("created").ascending());
-        List<ItemRequestDto> content = requestRepository.findAllByRequestorIdIsNot(userId, page)
-                .map(RequestMapper::toRequestDto).stream()
+        List<ItemRequestDto> content = requestRepository.findAllByRequestorIdIsNot(userId, page).stream()
+                .map(RequestMapper::toRequestDto)
                 .peek(itemRequestDto -> itemRequestDto.setItems(
                         itemRepository.findAllByRequestId(itemRequestDto.getId())
                                 .stream().map(ItemMapper::toItemDto)
@@ -90,6 +82,12 @@ public class RequestServiceImpl implements RequestService {
                 .collect(Collectors.toList());
         log.debug("Всего запросов вещей: {}.", content.size());
         return content;
+    }
+
+    @Override
+    public ItemRequest getItemRequestById(Long requestId) {
+        return requestRepository.findById(requestId)
+                .orElseThrow(() -> new NotFoundException(String.format(NOT_FOUND_ITEM_REQUEST, requestId)));
     }
 
 }

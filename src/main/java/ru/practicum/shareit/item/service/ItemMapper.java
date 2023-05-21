@@ -69,9 +69,7 @@ public class ItemMapper {
                         .filter(booking -> booking.getStart().isAfter(time))
                         .min(Comparator.comparing(Booking::getStart));
 
-                if (next.isPresent()) {
-                    itemDto.setNextBooking(BookingMapper.toShortBookingDto(next.get()));
-                }
+                next.ifPresent(booking -> itemDto.setNextBooking(BookingMapper.toShortBookingDto(booking)));
             }
         }
         itemDto.setComments(CommentMapper.toCommentDto(comments));

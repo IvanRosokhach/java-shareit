@@ -2,8 +2,8 @@ package ru.practicum.shareit.request.service;
 
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemMapper;
-import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
+import ru.practicum.shareit.request.model.ItemRequest;
 
 import java.util.Collection;
 
