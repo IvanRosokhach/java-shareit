@@ -6,15 +6,14 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.service.CommentMapper;
-import ru.practicum.shareit.item.service.ItemMapper;
 import ru.practicum.shareit.item.service.ItemService;
 
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
+@Validated
 @RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor
@@ -26,20 +25,22 @@ public class ItemController {
     public ItemDto create(@RequestHeader("X-Sharer-User-Id") Long userId,
                           @RequestBody @Validated ItemDto itemDto) {
         log.debug("Create");
-        return ItemMapper.toItemDto(itemService.create(userId, itemDto));
+        return itemService.create(userId, itemDto);
     }
 
     @GetMapping("/{itemId}")
     public ItemDto read(@RequestHeader("X-Sharer-User-Id") Long userId,
                         @PathVariable long itemId) {
-        log.debug("Read");
+        log.debug("Read({})", itemId);
         return itemService.read(userId, itemId);
     }
 
     @GetMapping
-    public Collection<ItemDto> readAll(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    public Collection<ItemDto> readAll(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                       @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+                                       @RequestParam(defaultValue = "10") @Positive int size) {
         log.debug("ReadAll");
-        return itemService.readAll(userId);
+        return itemService.readAll(userId, from, size);
     }
 
     @PatchMapping("/{itemId}")
@@ -47,7 +48,7 @@ public class ItemController {
                           @PathVariable long itemId,
                           @RequestBody ItemDto itemDto) {
         log.debug("Update({})", itemId);
-        return ItemMapper.toItemDto(itemService.update(userId, itemId, itemDto));
+        return itemService.update(userId, itemId, itemDto);
     }
 
     @DeleteMapping("/{itemId}")
@@ -58,10 +59,12 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public List<ItemDto> search(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                @RequestParam String text) {
+    public Collection<ItemDto> search(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                      @RequestParam String text,
+                                      @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+                                      @RequestParam(defaultValue = "10") @Positive int size) {
         log.debug("Search({})", text);
-        return itemService.search(userId, text).stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
+        return itemService.search(userId, text, from, size);
     }
 
     @PostMapping("/{itemId}/comment")
@@ -69,7 +72,7 @@ public class ItemController {
                                     @PathVariable long itemId,
                                     @RequestBody @Validated CommentDto commentDto) {
         log.debug("{}/CreateComment()", itemId);
-        return CommentMapper.toCommentDto(itemService.createComment(userId, itemId, commentDto));
+        return itemService.createComment(userId, itemId, commentDto);
     }
 
 }

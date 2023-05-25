@@ -22,33 +22,31 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     @Override
-    public User create(UserDto userDto) {
+    public UserDto create(UserDto userDto) {
         User user = userRepository.save(UserMapper.toUser(userDto));
         log.debug("Пользователь создан: {}.", user);
-        return user;
+        return UserMapper.toUserDto(user);
     }
 
     @Override
-    public User read(long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(String.format(NOT_FOUND_USER, userId)));
+    public UserDto read(long userId) {
+        User user = getUserById(userId);
         log.debug("Пользователь с id: {} найден.", userId);
-        return user;
+        return UserMapper.toUserDto(user);
     }
 
     @Override
-    public Collection<User> readAll() {
+    public Collection<UserDto> readAll() {
         List<User> allUsers = userRepository.findAll();
-        log.debug("Всего пользователей: {}.", allUsers.size());
-        return allUsers;
+        log.debug("Всего пользователей найдено: {}.", allUsers.size());
+        return UserMapper.listToUserDto(allUsers);
     }
 
     @Transactional
     @Override
-    public User update(long userId, UserDto userDto) {
+    public UserDto update(long userId, UserDto userDto) {
         User user = UserMapper.toUser(userDto);
-        User userForUpdate = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(String.format(NOT_FOUND_USER, userId)));
+        User userForUpdate = getUserById(userId);
 
         if (user.getEmail() != null) {
             userForUpdate.setEmail(user.getEmail());
@@ -58,16 +56,27 @@ public class UserServiceImpl implements UserService {
         }
         User updated = userRepository.save(userForUpdate);
         log.debug("Пользователь с id: {} обновлен.", userId);
-        return updated;
+        return UserMapper.toUserDto(updated);
     }
 
     @Override
     public void delete(long userId) {
+        userIsExist(userId);
+        userRepository.deleteById(userId);
+        log.debug("Пользователь с id: {} удален.", userId);
+    }
+
+    @Override
+    public void userIsExist(long userId) {
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException(String.format(NOT_FOUND_USER, userId));
         }
-        userRepository.deleteById(userId);
-        log.debug("Пользователь с id: {} удален.", userId);
+    }
+
+    @Override
+    public User getUserById(long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(String.format(NOT_FOUND_USER, userId)));
     }
 
 }
