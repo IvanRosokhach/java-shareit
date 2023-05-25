@@ -43,7 +43,7 @@ class UserServiceTest {
     }
 
     @Test
-    void create_whenInvoke_thenSavedUser() {
+    void createWhenInvokeThenSavedUser() {
         User user = UserMapper.toUser(userDto);
         when(userRepository.save(user)).thenReturn(user);
 
@@ -54,7 +54,7 @@ class UserServiceTest {
     }
 
     @Test
-    void read_whenUserFound_thenReturnUser() {
+    void readWhenUserFoundThenReturnUser() {
         User user = UserMapper.toUser(userDto);
         when(userRepository.findById(id)).thenReturn(Optional.of(user));
 
@@ -64,14 +64,14 @@ class UserServiceTest {
     }
 
     @Test
-    void read_whenUserNotFound_thenNotFoundExceptionThrown() {
+    void readWhenUserNotFoundThenNotFoundExceptionThrown() {
         when(userRepository.findById(id)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> userService.read(id));
     }
 
     @Test
-    void readAll_whenInvoke_thenReturnUsers() {
+    void readAllWhenInvokeThenReturnUsers() {
         when(userRepository.findAll()).thenReturn(List.of(new User()));
 
         Collection<UserDto> actual = userService.readAll();
@@ -80,7 +80,7 @@ class UserServiceTest {
     }
 
     @Test
-    void update_whenUserExist_thenUserUpdatedAndSave() {
+    void updateWhenUserExistThenUserUpdatedAndSave() {
         User oldUser = UserMapper.toUser(userDto);
         UserDto newUser = new UserDto(0L, "nameUpdated", "updated@mail.ru");
         when(userRepository.findById(id)).thenReturn(Optional.of(oldUser));
@@ -94,7 +94,7 @@ class UserServiceTest {
     }
 
     @Test
-    void update_whenUserExist_thenUserUpdatedEmailAndSave() {
+    void updateWhenUserExistThenUserUpdatedEmailAndSave() {
         User oldUser = UserMapper.toUser(userDto);
         UserDto newUser = new UserDto(0L, null, "updated@mail.ru");
         when(userRepository.findById(id)).thenReturn(Optional.of(oldUser));
@@ -108,7 +108,7 @@ class UserServiceTest {
     }
 
     @Test
-    void update_whenUserExist_thenUserUpdatedNameAndSave() {
+    void updateWhenUserExistThenUserUpdatedNameAndSave() {
         User oldUser = UserMapper.toUser(userDto);
         UserDto newUser = new UserDto(0L, "nameUpdated", null);
         when(userRepository.findById(id)).thenReturn(Optional.of(oldUser));
@@ -122,7 +122,7 @@ class UserServiceTest {
     }
 
     @Test
-    void delete_whenUserExist_thenUserDelete() {
+    void deleteWhenUserExistThenUserDelete() {
         when(userRepository.existsById(id)).thenReturn(true);
 
         userService.delete(id);
@@ -131,14 +131,14 @@ class UserServiceTest {
     }
 
     @Test
-    void delete_whenUserNotExist_thenNotFoundExceptionThrow() {
+    void deleteWhenUserNotExistThenNotFoundExceptionThrow() {
         when(userRepository.existsById(id)).thenReturn(false);
 
         assertThrows(NotFoundException.class, () -> userService.delete(id));
     }
 
     @Test
-    void getUserById_whenUserNotExist_thenNotFoundExceptionThrow() {
+    void getUserByIdWhenUserNotExistThenNotFoundExceptionThrow() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> userService.getUserById(id));

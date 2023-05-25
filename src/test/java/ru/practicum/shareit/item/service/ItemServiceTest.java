@@ -23,7 +23,7 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.model.ItemRequest;
-import ru.practicum.shareit.request.service.RequestService;
+import ru.practicum.shareit.request.repository.RequestRepository;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserMapper;
@@ -43,7 +43,7 @@ import static org.mockito.Mockito.*;
 class ItemServiceTest {
 
     @Mock
-    private UserService userRepository;
+    private UserService userService;
 
     @Mock
     private ItemRepository itemRepository;
@@ -55,7 +55,7 @@ class ItemServiceTest {
     private BookingRepository bookingRepository;
 
     @Mock
-    private RequestService requestService;
+    private RequestRepository requestRepository;
 
     @InjectMocks
     private ItemServiceImpl itemService;
@@ -139,10 +139,10 @@ class ItemServiceTest {
     }
 
     @Test
-    void create_whenInvoke_thenSavedItem() {
+    void createWhenInvokeThenSavedItem() {
         User user = UserMapper.toUser(userDto);
         Item item = ItemMapper.toItem(itemDto);
-        when(userRepository.getUserById(user.getId())).thenReturn(user);
+        when(userService.getUserById(user.getId())).thenReturn(user);
         when(itemRepository.save(any())).thenReturn(item);
 
         ItemDto actual = itemService.create(user.getId(), itemDto);
@@ -154,10 +154,10 @@ class ItemServiceTest {
     }
 
     @Test
-    void create_whenInvoke_thenSavedItemAndSetOwner() {
+    void createWhenInvokeThenSavedItemAndSetOwner() {
         User user = UserMapper.toUser(userDto);
         Item item = ItemMapper.toItem(itemDto);
-        when(userRepository.getUserById(user.getId())).thenReturn(user);
+        when(userService.getUserById(user.getId())).thenReturn(user);
         when(itemRepository.save(any())).thenReturn(item);
 
         itemService.create(user.getId(), itemDto);
@@ -171,12 +171,12 @@ class ItemServiceTest {
     }
 
     @Test
-    void create_whenInvoke_thenSavedItemAndSetRequest() {
+    void createWhenInvokeThenSavedItemAndSetRequest() {
         User user = UserMapper.toUser(userDto);
         itemDto.setRequestId(6L);
         Item item = ItemMapper.toItem(itemDto);
-        when(userRepository.getUserById(user.getId())).thenReturn(user);
-        when(requestService.getItemRequestById(itemDto.getRequestId())).thenReturn(request);
+        when(userService.getUserById(user.getId())).thenReturn(user);
+        when(requestRepository.findById(itemDto.getRequestId())).thenReturn(Optional.of(request));
         when(itemRepository.save(any())).thenReturn(item);
 
         itemService.create(user.getId(), itemDto);
@@ -191,9 +191,9 @@ class ItemServiceTest {
     }
 
     @Test
-    void create_whenUserNotFound_thenNotFoundExceptionThrow() {
+    void createWhenUserNotFoundThenNotFoundExceptionThrow() {
         User user = UserMapper.toUser(userDto);
-        when(userRepository.getUserById(user.getId())).thenThrow(NotFoundException.class);
+        when(userService.getUserById(user.getId())).thenThrow(NotFoundException.class);
 
         assertThrows(NotFoundException.class, () -> itemService.create(user.getId(), itemDto));
 
@@ -201,7 +201,7 @@ class ItemServiceTest {
     }
 
     @Test
-    void read_whenLastBookingExist_thenReturnItem() {
+    void readWhenLastBookingExistThenReturnItem() {
         when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
         when(bookingRepository.findAllByItemIdIn(Set.of(item.getId()))).thenReturn(List.of(booking));
         when(commentRepository.findAllByItemId(item.getId())).thenReturn(List.of(comment));
@@ -214,7 +214,7 @@ class ItemServiceTest {
     }
 
     @Test
-    void read_whenBookingsNotExist_thenReturnItemWithoutBookings() {
+    void readWhenBookingsNotExistThenReturnItemWithoutBookings() {
         when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
         when(commentRepository.findAllByItemId(item.getId())).thenReturn(List.of(comment));
 
@@ -226,7 +226,7 @@ class ItemServiceTest {
     }
 
     @Test
-    void readAll_whenInvoke_thenReturnItems() {
+    void readAllWhenInvokeThenReturnItems() {
         when(itemRepository.findAllByOwnerId(owner.getId(), PageRequest.of(0, 10))).thenReturn(List.of(item));
         when(bookingRepository.findAllByItemIdIn(Set.of(item.getId()))).thenReturn(List.of(booking));
         when(commentRepository.findAllByItemIdIn(Set.of(item.getId()))).thenReturn(List.of(comment));
@@ -240,7 +240,7 @@ class ItemServiceTest {
     }
 
     @Test
-    void update_whenInvoke_thenReturnItemWithUpdatedFields() {
+    void updateWhenInvokeThenReturnItemWithUpdatedFields() {
         Item oldItem = ItemMapper.toItem(itemDto);
         oldItem.setId(1L);
         oldItem.setOwner(owner);
@@ -260,7 +260,7 @@ class ItemServiceTest {
     }
 
     @Test
-    void update_whenInvoke_thenReturnItemWithUnUpdatedFields() {
+    void updateWhenInvokeThenReturnItemWithUnUpdatedFields() {
         Item oldItem = ItemMapper.toItem(itemDto);
         oldItem.setId(1L);
         oldItem.setOwner(owner);
@@ -280,7 +280,7 @@ class ItemServiceTest {
     }
 
     @Test
-    void update_whenInvokeNotItemOwner_thenNotOwnerExceptionThrow() {
+    void updateWhenInvokeNotItemOwnerThenNotOwnerExceptionThrow() {
         Item oldItem = ItemMapper.toItem(itemDto);
         oldItem.setId(1L);
         oldItem.setOwner(owner);
@@ -293,7 +293,7 @@ class ItemServiceTest {
     }
 
     @Test
-    void delete_whenInvoke_thenDeleteItem() {
+    void deleteWhenInvokeThenDeleteItem() {
         Item item = ItemMapper.toItem(itemDto);
         item.setOwner(owner);
         when(itemRepository.findById(id)).thenReturn(Optional.of(item));
@@ -304,7 +304,7 @@ class ItemServiceTest {
     }
 
     @Test
-    void delete_whenInvokeNotOwner_thenNotOwnerExceptionThrow() {
+    void deleteWhenInvokeNotOwnerThenNotOwnerExceptionThrow() {
         long notOwnerId = 1L;
         Item item = ItemMapper.toItem(itemDto);
         item.setOwner(owner);
@@ -316,7 +316,7 @@ class ItemServiceTest {
     }
 
     @Test
-    void search_whenEmptySearchText_thenReturnEmptyResult() {
+    void searchWhenEmptySearchTextThenReturnEmptyResult() {
         String text = "";
         Collection<ItemDto> result = itemService.search(id, text, 0, 10);
 
@@ -326,7 +326,7 @@ class ItemServiceTest {
     }
 
     @Test
-    void search_whenBlankSearchText_thenReturnEmptyResult() {
+    void searchWhenBlankSearchTextThenReturnEmptyResult() {
         String text = "              ";
         Collection<ItemDto> result = itemService.search(id, text, 0, 10);
 
@@ -335,7 +335,7 @@ class ItemServiceTest {
     }
 
     @Test
-    void search_whenInvoke_thenReturnResult() {
+    void searchWhenInvokeThenReturnResult() {
         int from = 0;
         int size = 10;
         when(itemRepository.search("item", PageRequest.of(from, size))).thenReturn(List.of(ItemMapper.toItem(itemDto)));
@@ -347,9 +347,9 @@ class ItemServiceTest {
     }
 
     @Test
-    void createComment_whenInvoke_ThenReturnSavedComment() {
+    void createCommentWhenInvokeThenReturnSavedComment() {
         List<Booking> notEmpty = List.of(new Booking());
-        when(userRepository.getUserById(id)).thenReturn(user);
+        when(userService.getUserById(id)).thenReturn(user);
         when(itemRepository.findById(id)).thenReturn(Optional.of(item));
         when(bookingRepository.findAllByBookerIdAndItemIdAndEndIsBefore(any(), any(), any())).thenReturn(notEmpty);
         when(commentRepository.save(any(Comment.class))).thenReturn(comment);
@@ -362,9 +362,9 @@ class ItemServiceTest {
     }
 
     @Test
-    void createComment_whenWasNoBooking_thenUncompletedBookingExceptionThrow() {
+    void createCommentWhenWasNoBookingThenUncompletedBookingExceptionThrow() {
         List<Booking> empty = List.of();
-        when(userRepository.getUserById(id)).thenReturn(owner);
+        when(userService.getUserById(id)).thenReturn(owner);
         when(itemRepository.findById(id)).thenReturn(Optional.of(item));
         when(bookingRepository.findAllByBookerIdAndItemIdAndEndIsBefore(any(), any(), any())).thenReturn(empty);
 
@@ -374,7 +374,7 @@ class ItemServiceTest {
     }
 
     @Test
-    void getItemById_whenItemNotExist_thenNotFoundExceptionThrow() {
+    void getItemByIdWhenItemNotExistThenNotFoundExceptionThrow() {
         when(itemRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> itemService.getItemById(id));

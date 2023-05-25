@@ -7,8 +7,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.service.ItemMapper;
+import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.repository.RequestRepository;
@@ -30,7 +30,7 @@ import static ru.practicum.shareit.exception.Constant.NOT_FOUND_ITEM_REQUEST;
 public class RequestServiceImpl implements RequestService {
 
     private final UserService userService;
-    private final ItemRepository itemRepository;
+    private final ItemService itemService;
     private final RequestRepository requestRepository;
 
     @Override
@@ -49,7 +49,7 @@ public class RequestServiceImpl implements RequestService {
         Map<Long, ItemRequest> collectItemRequest = requestRepository.findAllByRequestorId(userId)
                 .stream().collect(Collectors.toMap(ItemRequest::getId, Function.identity()));
 
-        Map<Long, List<Item>> collectItem = itemRepository.findAllByRequestRequestorId(userId)
+        Map<Long, List<Item>> collectItem = itemService.findAllByRequestRequestorId(userId)
                 .stream().collect(Collectors.groupingBy(item -> item.getRequest().getId()));
 
         List<ItemRequestDto> itemRequestDto = collectItemRequest.values().stream()
@@ -64,7 +64,7 @@ public class RequestServiceImpl implements RequestService {
     public ItemRequestDto read(Long userId, Long requestId) {
         userService.userIsExist(userId);
         ItemRequest itemRequest = getItemRequestById(requestId);
-        Collection<Item> allByRequestId = itemRepository.findAllByRequestId(itemRequest.getId());
+        Collection<Item> allByRequestId = itemService.findAllByRequestId(itemRequest.getId());
         ItemRequestDto itemRequestDto = RequestMapper.toRequestDto(itemRequest, allByRequestId);
         log.debug("Запрос вещи с id: {} найден.", requestId);
         return itemRequestDto;
@@ -76,7 +76,7 @@ public class RequestServiceImpl implements RequestService {
         List<ItemRequestDto> content = requestRepository.findAllByRequestorIdIsNot(userId, page).stream()
                 .map(RequestMapper::toRequestDto)
                 .peek(itemRequestDto -> itemRequestDto.setItems(
-                        itemRepository.findAllByRequestId(itemRequestDto.getId())
+                        itemService.findAllByRequestId(itemRequestDto.getId())
                                 .stream().map(ItemMapper::toItemDto)
                                 .collect(Collectors.toList())))
                 .collect(Collectors.toList());

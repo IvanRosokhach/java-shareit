@@ -24,4 +24,8 @@ public interface ItemService {
 
     Item getItemById(long itemId);
 
+    Collection<Item> findAllByRequestRequestorId(long userId);
+
+    Collection<Item> findAllByRequestId(long requestId);
+
 }

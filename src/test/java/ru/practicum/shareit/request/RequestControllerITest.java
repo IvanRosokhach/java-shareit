@@ -47,7 +47,7 @@ class RequestControllerITest {
 
     @SneakyThrows
     @Test
-    void create_whenInvoke_thenReturnOk() {
+    void createWhenInvokeThenReturnOk() {
         when(requestService.create(userId, itemRequestDto)).thenReturn(itemRequestDto);
 
         String result = mockMvc.perform(post("/requests")
@@ -67,7 +67,7 @@ class RequestControllerITest {
 
     @SneakyThrows
     @Test
-    void readUserId_whenInvoke_thenReturnOk() {
+    void readUserIdWhenInvokeThenReturnOk() {
         List<ItemRequestDto> requests = List.of(itemRequestDto);
         when(requestService.read(userId)).thenReturn(requests);
 
@@ -85,7 +85,7 @@ class RequestControllerITest {
 
     @SneakyThrows
     @Test
-    void readItemId_whenInvoke_thenReturnOk() {
+    void readItemIdWhenInvokeThenReturnOk() {
         when(requestService.read(userId, itemId)).thenReturn(itemRequestDto);
 
         String result = mockMvc.perform(get("/requests/{itemId}", itemId)
@@ -102,7 +102,7 @@ class RequestControllerITest {
 
     @SneakyThrows
     @Test
-    void readAll_whenInvoke_thenReturnOk() {
+    void readAllWhenInvokeThenReturnOk() {
         List<ItemRequestDto> requests = List.of(itemRequestDto);
         when(requestService.readAll(userId, 0, 10)).thenReturn(requests);
 

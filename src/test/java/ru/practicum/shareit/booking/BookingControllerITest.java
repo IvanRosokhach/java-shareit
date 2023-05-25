@@ -50,7 +50,7 @@ class BookingControllerITest {
 
     @SneakyThrows
     @Test
-    void create_whenInvoke_thenReturnOk() {
+    void createWhenInvokeThenReturnOk() {
         when(bookingService.create(userId, bookingDto)).thenReturn(bookingDto);
 
         String result = mockMvc.perform(post("/bookings")
@@ -70,7 +70,7 @@ class BookingControllerITest {
 
     @SneakyThrows
     @Test
-    void create_whenDtoNotValid_thenReturnBadRequest() {
+    void createWhenDtoNotValidThenReturnBadRequest() {
         bookingDto.setStart(LocalDateTime.now().minusMinutes(1));
 
         mockMvc.perform(post("/bookings")
@@ -86,7 +86,7 @@ class BookingControllerITest {
 
     @SneakyThrows
     @Test
-    void read_whenInvoke_thenReturnOk() {
+    void readWhenInvokeThenReturnOk() {
         when(bookingService.read(userId, bookingId)).thenReturn(bookingDto);
 
         String result = mockMvc.perform(get("/bookings/{bookingId}", bookingId)
@@ -103,7 +103,7 @@ class BookingControllerITest {
 
     @SneakyThrows
     @Test
-    void readAll_whenInvoke_thenReturnOk() {
+    void readAllWhenInvokeThenReturnOk() {
         List<BookingDto> bookings = List.of(bookingDto);
         when(bookingService.readAll(userId, BookingState.ALL, 0, 10)).thenReturn(bookings);
 
@@ -124,7 +124,7 @@ class BookingControllerITest {
 
     @SneakyThrows
     @Test
-    void update_whenInvoke_thenReturnOk() {
+    void updateWhenInvokeThenReturnOk() {
         when(bookingService.updateStatus(userId, bookingId, true)).thenReturn(bookingDto);
 
         String result = mockMvc.perform(patch("/bookings/{bookingId}", bookingId)
@@ -142,7 +142,7 @@ class BookingControllerITest {
 
     @SneakyThrows
     @Test
-    void delete_whenInvoke_thenReturnOk() {
+    void deleteWhenInvokeThenReturnOk() {
         mockMvc.perform(MockMvcRequestBuilders.delete("/bookings/{bookingId}", bookingId)
                         .header("X-Sharer-User-Id", userId))
                 .andExpect(status().isOk());
@@ -152,7 +152,7 @@ class BookingControllerITest {
 
     @SneakyThrows
     @Test
-    void readForOwner_whenInvoke_thenReturnOk() {
+    void readForOwnerWhenInvokeThenReturnOk() {
         List<BookingDto> bookings = List.of(bookingDto);
         when(bookingService.readForOwner(userId, BookingState.ALL, 0, 10)).thenReturn(bookings);
 

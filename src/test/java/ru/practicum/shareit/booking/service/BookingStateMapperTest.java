@@ -17,14 +17,14 @@ class BookingStateMapperTest {
     private BookingStateMapper bookingStateMapper;
 
     @Test
-    void toBookingState_whenInvoke_thenReturnBookingState() {
+    void toBookingStateWhenInvokeThenReturnBookingState() {
         BookingState result = BookingStateMapper.toBookingState("ALL");
 
         assertEquals(BookingState.ALL, result);
     }
 
     @Test
-    void toBookingState_whenNoValidState_thenThrowException() {
+    void toBookingStateWhenNoValidStateThenThrowException() {
         assertThrows(NotAvailableException.class, () -> BookingStateMapper.toBookingState("INCORRECT"));
     }
 

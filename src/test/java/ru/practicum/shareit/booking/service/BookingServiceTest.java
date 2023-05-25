@@ -100,7 +100,7 @@ class BookingServiceTest {
     }
 
     @Test
-    void create_whenInvoke_thenSavedItem() {
+    void createWhenInvokeThenSavedItem() {
         when(itemService.getItemById(item.getId())).thenReturn(item);
         when(userService.getUserById(user.getId())).thenReturn(user);
         when(bookingRepository.save(any())).thenReturn(booking);
@@ -119,7 +119,7 @@ class BookingServiceTest {
 
 
     @Test
-    void create_whenNotValidTime_thenIncorrectDateTimeExceptionThrow() {
+    void createWhenNotValidTimeThenIncorrectDateTimeExceptionThrow() {
         bookingToSave.setStart(time.plusHours(2));
         bookingToSave.setEnd(time.plusHours(1));
 
@@ -129,7 +129,7 @@ class BookingServiceTest {
     }
 
     @Test
-    void create_whenItemNotAvailable_thenNotAvailable() {
+    void createWhenItemNotAvailableThenNotAvailable() {
         item.setAvailable(false);
         when(itemService.getItemById(item.getId())).thenReturn(item);
 
@@ -139,7 +139,7 @@ class BookingServiceTest {
     }
 
     @Test
-    void create_whenBookerIsTheItemOwner_thenNotFoundExceptionThrow() {
+    void createWhenBookerIsTheItemOwnerThenNotFoundExceptionThrow() {
         when(itemService.getItemById(item.getId())).thenReturn(item);
         when(userService.getUserById(owner.getId())).thenReturn(owner);
 
@@ -149,7 +149,7 @@ class BookingServiceTest {
     }
 
     @Test
-    void read_whenInvoke_thenReturnBooking() {
+    void readWhenInvokeThenReturnBooking() {
         BookingDto expected = BookingMapper.toBookingDto(booking);
         when(bookingRepository.findById(booking.getId())).thenReturn(Optional.of(booking));
 
@@ -159,14 +159,14 @@ class BookingServiceTest {
     }
 
     @Test
-    void read_whenUserNotOwnerOrNotBooker_thenNotOwnerExceptionThrow() {
+    void readWhenUserNotOwnerOrNotBookerThenNotOwnerExceptionThrow() {
         when(bookingRepository.findById(booking.getId())).thenReturn(Optional.of(booking));
 
         assertThrows(NotOwnerException.class, () -> bookingService.read(999L, booking.getId()));
     }
 
     @Test
-    void readAll_whenStateAll_thenReturnBookings() {
+    void readAllWhenStateAllThenReturnBookings() {
         when(bookingRepository.findAllByBookerId(any(), any())).thenReturn(List.of(booking));
 
         Collection<BookingDto> actual = bookingService.readAll(owner.getId(), BookingState.ALL, from, size);
@@ -175,7 +175,7 @@ class BookingServiceTest {
     }
 
     @Test
-    void readAll_whenStatePast_thenReturnBookings() {
+    void readAllWhenStatePastThenReturnBookings() {
         when(bookingRepository.findAllByBookerIdAndEndBefore(any(), any(), any())).thenReturn(List.of(booking));
 
         Collection<BookingDto> actual = bookingService.readAll(owner.getId(), BookingState.PAST, from, size);
@@ -184,7 +184,7 @@ class BookingServiceTest {
     }
 
     @Test
-    void readAll_whenStateCurrent_thenReturnBookings() {
+    void readAllWhenStateCurrentThenReturnBookings() {
         when(bookingRepository.findAllByBookerIdAndStartBeforeAndEndAfter(
                 any(), any(), any(), any())).thenReturn(List.of(booking));
 
@@ -194,7 +194,7 @@ class BookingServiceTest {
     }
 
     @Test
-    void readAll_whenStateFuture_thenReturnBookings() {
+    void readAllWhenStateFutureThenReturnBookings() {
         when(bookingRepository.findAllByBookerIdAndStartAfter(any(), any(), any())).thenReturn(List.of(booking));
 
         Collection<BookingDto> actual = bookingService.readAll(owner.getId(), BookingState.FUTURE, from, size);
@@ -203,7 +203,7 @@ class BookingServiceTest {
     }
 
     @Test
-    void readAll_whenStateWaiting_thenReturnBookings() {
+    void readAllWhenStateWaitingThenReturnBookings() {
         when(bookingRepository.findAllByBookerIdAndStatus(any(), any(), any())).thenReturn(List.of(booking));
 
         Collection<BookingDto> actual = bookingService.readAll(owner.getId(), BookingState.WAITING, from, size);
@@ -212,7 +212,7 @@ class BookingServiceTest {
     }
 
     @Test
-    void readAll_whenStateRejected_thenReturnBookings() {
+    void readAllWhenStateRejectedThenReturnBookings() {
         when(bookingRepository.findAllByBookerIdAndStatus(any(), any(), any())).thenReturn(List.of(booking));
 
         Collection<BookingDto> actual = bookingService.readAll(owner.getId(), BookingState.REJECTED, from, size);
@@ -221,7 +221,7 @@ class BookingServiceTest {
     }
 
     @Test
-    void updateStatus_whenInvoke_thenReturnUpdatedBooking() {
+    void updateStatusWhenInvokeThenReturnUpdatedBooking() {
         booking.setStatus(BookingStatus.WAITING);
         when(bookingRepository.findById(booking.getId())).thenReturn(Optional.of(booking));
         when(bookingRepository.save(booking)).thenReturn(booking);
@@ -232,7 +232,7 @@ class BookingServiceTest {
     }
 
     @Test
-    void updateStatus_whenStatusIsAlreadyApprove_thenNotAvailableExceptionThrow() {
+    void updateStatusWhenStatusIsAlreadyApproveThenNotAvailableExceptionThrow() {
         when(bookingRepository.findById(booking.getId())).thenReturn(Optional.of(booking));
 
         assertThrows(NotAvailableException.class,
@@ -242,7 +242,7 @@ class BookingServiceTest {
     }
 
     @Test
-    void updateStatus_whenUserNotExist_thenNotFoundExceptionThrow() {
+    void updateStatusWhenUserNotExistThenNotFoundExceptionThrow() {
         when(bookingRepository.findById(booking.getId())).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
@@ -252,7 +252,7 @@ class BookingServiceTest {
     }
 
     @Test
-    void updateStatus_whenUserWasNotOwner_thenNotOwnerExceptionThrow() {
+    void updateStatusWhenUserWasNotOwnerThenNotOwnerExceptionThrow() {
         when(bookingRepository.findById(booking.getId())).thenReturn(Optional.of(booking));
 
         assertThrows(NotOwnerException.class,
@@ -262,7 +262,7 @@ class BookingServiceTest {
     }
 
     @Test
-    void delete_whenUserWasNotOwner_thenNotOwnerExceptionThrow() {
+    void deleteWhenUserWasNotOwnerThenNotOwnerExceptionThrow() {
         when(bookingRepository.findById(booking.getId())).thenReturn(Optional.of(booking));
 
         assertThrows(NotOwnerException.class,
@@ -272,7 +272,7 @@ class BookingServiceTest {
     }
 
     @Test
-    void delete_whenInvoke_thenDeleteBooking() {
+    void deleteWhenInvokeThenDeleteBooking() {
         when(bookingRepository.findById(booking.getId())).thenReturn(Optional.of(booking));
 
         bookingService.delete(user.getId(), booking.getId());
@@ -282,7 +282,7 @@ class BookingServiceTest {
 
 
     @Test
-    void readForOwner_whenStateAll_thenReturnBookings() {
+    void readForOwnerWhenStateAllThenReturnBookings() {
         when(bookingRepository.findAllForOwner(any(), any())).thenReturn(List.of(booking));
 
         Collection<BookingDto> actual = bookingService.readForOwner(owner.getId(), BookingState.ALL, from, size);
@@ -291,7 +291,7 @@ class BookingServiceTest {
     }
 
     @Test
-    void readForOwner_whenStatePast_thenReturnBookings() {
+    void readForOwnerWhenStatePastThenReturnBookings() {
         when(bookingRepository.findAllForOwnerPast(any(), any(), any())).thenReturn(List.of(booking));
 
         Collection<BookingDto> actual = bookingService.readForOwner(owner.getId(), BookingState.PAST, from, size);
@@ -300,7 +300,7 @@ class BookingServiceTest {
     }
 
     @Test
-    void readForOwner_whenStateCurrent_thenReturnBookings() {
+    void readForOwnerWhenStateCurrentThenReturnBookings() {
         when(bookingRepository.findAllForOwnerCurrent(any(), any(), any())).thenReturn(List.of(booking));
 
         Collection<BookingDto> actual = bookingService.readForOwner(owner.getId(), BookingState.CURRENT, from, size);
@@ -309,7 +309,7 @@ class BookingServiceTest {
     }
 
     @Test
-    void readForOwner_whenStateFuture_thenReturnBookings() {
+    void readForOwnerWhenStateFutureThenReturnBookings() {
         when(bookingRepository.findAllForOwnerFuture(any(), any(), any())).thenReturn(List.of(booking));
 
         Collection<BookingDto> actual = bookingService.readForOwner(owner.getId(), BookingState.FUTURE, from, size);
@@ -318,7 +318,7 @@ class BookingServiceTest {
     }
 
     @Test
-    void readForOwner_whenStateWaiting_thenReturnBookings() {
+    void readForOwnerWhenStateWaitingThenReturnBookings() {
         when(bookingRepository.findAllForOwnerState(any(), any(), any())).thenReturn(List.of(booking));
 
         Collection<BookingDto> actual = bookingService.readForOwner(owner.getId(), BookingState.WAITING, from, size);
@@ -327,7 +327,7 @@ class BookingServiceTest {
     }
 
     @Test
-    void readForOwner_whenStateRejected_thenReturnBookings() {
+    void readForOwnerWhenStateRejectedThenReturnBookings() {
         when(bookingRepository.findAllForOwnerState(any(), any(), any())).thenReturn(List.of(booking));
 
         Collection<BookingDto> actual = bookingService.readForOwner(owner.getId(), BookingState.REJECTED, from, size);

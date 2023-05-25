@@ -15,7 +15,7 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.request.service.RequestService;
+import ru.practicum.shareit.request.repository.RequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -25,6 +25,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.exception.Constant.NOT_FOUND_ITEM;
+import static ru.practicum.shareit.exception.Constant.NOT_FOUND_ITEM_REQUEST;
 
 @Slf4j
 @Service
@@ -35,14 +36,16 @@ public class ItemServiceImpl implements ItemService {
     private final CommentRepository commentRepository;
     private final BookingRepository bookingRepository;
     private final UserService userService;
-    private final RequestService requestService;
+    private final RequestRepository requestRepository;
 
     @Override
     public ItemDto create(long userId, ItemDto itemDto) {
         Item item = ItemMapper.toItem(itemDto);
         item.setOwner(userService.getUserById(userId));
         if (itemDto.getRequestId() != null) {
-            item.setRequest(requestService.getItemRequestById(itemDto.getRequestId()));
+            item.setRequest(requestRepository.findById(itemDto.getRequestId())
+                    .orElseThrow(() -> new NotFoundException(
+                            String.format(NOT_FOUND_ITEM_REQUEST, itemDto.getRequestId()))));
         }
         Item savedItem = itemRepository.save(item);
         log.debug("Вещь добавлена с id: {}.", savedItem.getId());
@@ -153,6 +156,16 @@ public class ItemServiceImpl implements ItemService {
     public Item getItemById(long itemId) {
         return itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException(String.format(NOT_FOUND_ITEM, itemId)));
+    }
+
+    @Override
+    public Collection<Item> findAllByRequestRequestorId(long userId) {
+        return itemRepository.findAllByRequestRequestorId(userId);
+    }
+
+    @Override
+    public Collection<Item> findAllByRequestId(long requestId) {
+        return itemRepository.findAllByRequestId(requestId);
     }
 
 }

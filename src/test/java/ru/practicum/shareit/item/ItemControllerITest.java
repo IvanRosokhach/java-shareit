@@ -54,7 +54,7 @@ class ItemControllerITest {
 
     @SneakyThrows
     @Test
-    void create_whenInvoke_thenReturnOk() {
+    void createWhenInvokeThenReturnOk() {
         when(itemService.create(userId, itemDto)).thenReturn(itemDto);
 
         String result = mockMvc.perform(post("/items")
@@ -74,7 +74,7 @@ class ItemControllerITest {
 
     @SneakyThrows
     @Test
-    void create_whenDtoNotValid_thenReturnBadRequest() {
+    void createWhenDtoNotValidThenReturnBadRequest() {
         itemDto.setDescription(null);
         when(itemService.create(userId, itemDto)).thenReturn(itemDto);
 
@@ -91,7 +91,7 @@ class ItemControllerITest {
 
     @SneakyThrows
     @Test
-    void read_whenInvoke_thenReturnOk() {
+    void readWhenInvokeThenReturnOk() {
         when(itemService.read(userId, itemId)).thenReturn(itemDto);
 
         String result = mockMvc.perform(get("/items/{itemId}", itemId)
@@ -107,7 +107,7 @@ class ItemControllerITest {
 
     @SneakyThrows
     @Test
-    void readAll_whenInvoke_thenReturnOk() {
+    void readAllWhenInvokeThenReturnOk() {
         List<ItemDto> items = List.of(itemDto);
         when(itemService.readAll(userId, 0, 10)).thenReturn(items);
 
@@ -127,7 +127,7 @@ class ItemControllerITest {
 
     @SneakyThrows
     @Test
-    void update_whenInvoke_thenReturnOk() {
+    void updateWhenInvokeThenReturnOk() {
         when(itemService.update(userId, itemId, itemDto)).thenReturn(itemDto);
 
         String result = mockMvc.perform(patch("/items/{itemId}", itemId)
@@ -148,7 +148,7 @@ class ItemControllerITest {
 
     @SneakyThrows
     @Test
-    void delete_whenInvoke_thenReturnOk() {
+    void deleteWhenInvokeThenReturnOk() {
         mockMvc.perform(MockMvcRequestBuilders.delete("/items/{itemId}", itemId)
                         .header("X-Sharer-User-Id", userId))
                 .andExpect(status().isOk());
@@ -158,7 +158,7 @@ class ItemControllerITest {
 
     @SneakyThrows
     @Test
-    void search_whenInvoke_thenReturnFindItems() {
+    void searchWhenInvokeThenReturnFindItems() {
         List<ItemDto> items = List.of(itemDto);
         when(itemService.search(userId, "desc", 0, 10)).thenReturn(items);
 
@@ -179,7 +179,7 @@ class ItemControllerITest {
 
     @SneakyThrows
     @Test
-    void search_whenParamTextNull_thenStatusBadRequest() {
+    void searchWhenParamTextNullThenStatusBadRequest() {
         mockMvc.perform(get("/items/search")
                         .header("X-Sharer-User-Id", userId)
                         .param("from", "0")
@@ -191,7 +191,7 @@ class ItemControllerITest {
 
     @SneakyThrows
     @Test
-    void createComment_whenInvoke_thenReturnOk() {
+    void createCommentWhenInvokeThenReturnOk() {
         when(itemService.createComment(userId, itemId, commentDto)).thenReturn(commentDto);
 
         String result = mockMvc.perform(post("/items/{itemId}/comment", itemId)

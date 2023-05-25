@@ -10,7 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.repository.RequestRepository;
@@ -33,7 +33,7 @@ class RequestServiceTest {
     private UserService userService;
 
     @Mock
-    private ItemRepository itemRepository;
+    private ItemService itemService;
 
     @Mock
     private RequestRepository requestRepository;
@@ -80,7 +80,7 @@ class RequestServiceTest {
     }
 
     @Test
-    void create_whenInvoke_thenReturnItemRequest() {
+    void createWhenInvokeThenReturnItemRequest() {
         ItemRequestDto itemRequestDto = new ItemRequestDto();
         itemRequestDto.setDescription("desc");
         when(userService.getUserById(user.getId())).thenReturn(user);
@@ -98,9 +98,9 @@ class RequestServiceTest {
     }
 
     @Test
-    void read_whenInvoke_thenReturnItemRequests() {
+    void readWhenInvokeThenReturnItemRequests() {
         when(requestRepository.findAllByRequestorId(user.getId())).thenReturn(List.of(request));
-        when(itemRepository.findAllByRequestRequestorId(user.getId())).thenReturn(List.of(item));
+        when(itemService.findAllByRequestRequestorId(user.getId())).thenReturn(List.of(item));
 
         List<ItemRequestDto> actual = requestService.read(user.getId());
 
@@ -110,9 +110,9 @@ class RequestServiceTest {
     }
 
     @Test
-    void read_whenInvoke_thenReturnItemRequest() {
+    void readWhenInvokeThenReturnItemRequest() {
         when(requestRepository.findById(request.getId())).thenReturn(Optional.of(request));
-        when(itemRepository.findAllByRequestId(request.getId())).thenReturn(List.of(item));
+        when(itemService.findAllByRequestId(request.getId())).thenReturn(List.of(item));
 
         ItemRequestDto actual = requestService.read(user.getId(), request.getId());
 
@@ -122,9 +122,9 @@ class RequestServiceTest {
     }
 
     @Test
-    void readAll_whenInvoke_thenReturnItemRequests() {
+    void readAllWhenInvokeThenReturnItemRequests() {
         when(requestRepository.findAllByRequestorIdIsNot(any(), any())).thenReturn(List.of(request));
-        when(itemRepository.findAllByRequestId(request.getId())).thenReturn(List.of(item));
+        when(itemService.findAllByRequestId(request.getId())).thenReturn(List.of(item));
 
         List<ItemRequestDto> actual = requestService.readAll(user.getId(), 0, 10);
 
@@ -134,7 +134,7 @@ class RequestServiceTest {
     }
 
     @Test
-    void getItemRequestById_whenInvoke_thenReturnItemRequest() {
+    void getItemRequestByIdWhenInvokeThenReturnItemRequest() {
         when(requestRepository.findById(request.getId())).thenReturn(Optional.of(request));
 
         ItemRequest result = requestService.getItemRequestById(request.getId());
@@ -143,7 +143,7 @@ class RequestServiceTest {
     }
 
     @Test
-    void getItemRequestById_whenRequestNotExist_thenNotFoundExceptionThrow() {
+    void getItemRequestByIdWhenRequestNotExistThenNotFoundExceptionThrow() {
         when(requestRepository.findById(request.getId())).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> requestService.getItemRequestById(request.getId()));

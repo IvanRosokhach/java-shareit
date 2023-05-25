@@ -50,7 +50,7 @@ class ItemRepositoryIT {
     }
 
     @Test
-    void search_whenNotExistParam() {
+    void searchWhenNotExistParam() {
         List<Item> searched = itemRepository.search("item", Pageable.unpaged());
 
         assertEquals(0, searched.size());

@@ -48,7 +48,7 @@ class UserControllerITest {
 
     @SneakyThrows
     @Test
-    void create_whenInvoke_thenReturnOk() {
+    void createWhenInvokeThenReturnOk() {
         when(userService.create(userDto)).thenReturn(userDto);
 
         String result = mockMvc.perform(post("/users")
@@ -67,7 +67,7 @@ class UserControllerITest {
 
     @SneakyThrows
     @Test
-    void create_whenDtoNotValid_thenReturnBadRequest() {
+    void createWhenDtoNotValidThenReturnBadRequest() {
         userDto.setEmail("mail123");
 
         mockMvc.perform(post("/users")
@@ -82,7 +82,7 @@ class UserControllerITest {
 
     @SneakyThrows
     @Test
-    void read_whenInvoke_thenReturnOk() {
+    void readWhenInvokeThenReturnOk() {
         when(userService.read(id)).thenReturn(userDto);
 
         String result = mockMvc.perform(get("/users/{userId}", id)
@@ -98,7 +98,7 @@ class UserControllerITest {
 
     @SneakyThrows
     @Test
-    void readAll_whenInvoke_thenReturnOk() {
+    void readAllWhenInvokeThenReturnOk() {
         List<UserDto> users = List.of(userDto);
         when(userService.readAll()).thenReturn(users);
 
@@ -115,7 +115,7 @@ class UserControllerITest {
 
     @SneakyThrows
     @Test
-    void update_whenInvoke_thenReturnOk() {
+    void updateWhenInvokeThenReturnOk() {
         when(userService.update(id, userDto)).thenReturn(userDto);
 
         String result = mockMvc.perform(patch("/users/{userID}", id)
@@ -134,7 +134,7 @@ class UserControllerITest {
 
     @SneakyThrows
     @Test
-    void delete_whenInvoke_thenReturnOk() {
+    void deleteWhenInvokeThenReturnOk() {
         mockMvc.perform(MockMvcRequestBuilders.delete("/users/{userId}", id))
                 .andExpect(status().isOk());
 
