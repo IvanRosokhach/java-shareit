@@ -20,9 +20,6 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<Object> create(@RequestBody @Valid UserDto userDto) {
-        if (userDto.getName().isBlank() || userDto.getName().isEmpty()) {
-            throw new RuntimeException();
-        }
         log.info("Creating user {}", userDto);
         return userClient.create(userDto);
     }
@@ -41,7 +38,7 @@ public class UserController {
 
     @PatchMapping("/{userId}")
     public ResponseEntity<Object> update(@PathVariable long userId,
-                                         @RequestBody @Valid UserDto userDto) {
+                                         @RequestBody UserDto userDto) {
         log.info("Update user {}, userId={}", userDto, userId);
         return userClient.update(userId, userDto);
     }
