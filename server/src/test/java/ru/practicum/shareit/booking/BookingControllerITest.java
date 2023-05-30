@@ -70,22 +70,6 @@ class BookingControllerITest {
 
     @SneakyThrows
     @Test
-    void createWhenDtoNotValidThenReturnBadRequest() {
-        bookingDto.setStart(LocalDateTime.now().minusMinutes(1));
-
-        mockMvc.perform(post("/bookings")
-                        .header("X-Sharer-User-Id", userId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .content(objectMapper.writeValueAsString(bookingDto))
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-
-        verify(bookingService, never()).create(userId, bookingDto);
-    }
-
-    @SneakyThrows
-    @Test
     void readWhenInvokeThenReturnOk() {
         when(bookingService.read(userId, bookingId)).thenReturn(bookingDto);
 

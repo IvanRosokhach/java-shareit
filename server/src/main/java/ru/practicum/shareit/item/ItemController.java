@@ -2,18 +2,14 @@ package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
 import java.util.Collection;
 
 @Slf4j
-@Validated
 @RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor
@@ -23,7 +19,7 @@ public class ItemController {
 
     @PostMapping
     public ItemDto create(@RequestHeader("X-Sharer-User-Id") Long userId,
-                          @RequestBody @Validated ItemDto itemDto) {
+                          @RequestBody ItemDto itemDto) {
         log.debug("Create");
         return itemService.create(userId, itemDto);
     }
@@ -37,8 +33,8 @@ public class ItemController {
 
     @GetMapping
     public Collection<ItemDto> readAll(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                       @RequestParam(defaultValue = "0") @PositiveOrZero int from,
-                                       @RequestParam(defaultValue = "10") @Positive int size) {
+                                       @RequestParam(defaultValue = "0") int from,
+                                       @RequestParam(defaultValue = "10") int size) {
         log.debug("ReadAll");
         return itemService.readAll(userId, from, size);
     }
@@ -61,8 +57,8 @@ public class ItemController {
     @GetMapping("/search")
     public Collection<ItemDto> search(@RequestHeader("X-Sharer-User-Id") Long userId,
                                       @RequestParam String text,
-                                      @RequestParam(defaultValue = "0") @PositiveOrZero int from,
-                                      @RequestParam(defaultValue = "10") @Positive int size) {
+                                      @RequestParam(defaultValue = "0") int from,
+                                      @RequestParam(defaultValue = "10") int size) {
         log.debug("Search({})", text);
         return itemService.search(userId, text, from, size);
     }
@@ -70,7 +66,7 @@ public class ItemController {
     @PostMapping("/{itemId}/comment")
     public CommentDto createComment(@RequestHeader("X-Sharer-User-Id") Long userId,
                                     @PathVariable long itemId,
-                                    @RequestBody @Validated CommentDto commentDto) {
+                                    @RequestBody CommentDto commentDto) {
         log.debug("{}/CreateComment()", itemId);
         return itemService.createComment(userId, itemId, commentDto);
     }

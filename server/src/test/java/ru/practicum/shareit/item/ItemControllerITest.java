@@ -74,23 +74,6 @@ class ItemControllerITest {
 
     @SneakyThrows
     @Test
-    void createWhenDtoNotValidThenReturnBadRequest() {
-        itemDto.setDescription(null);
-        when(itemService.create(userId, itemDto)).thenReturn(itemDto);
-
-        mockMvc.perform(post("/items")
-                        .header("X-Sharer-User-Id", userId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .content(objectMapper.writeValueAsString(itemDto))
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-
-        verify(itemService, never()).create(userId, itemDto);
-    }
-
-    @SneakyThrows
-    @Test
     void readWhenInvokeThenReturnOk() {
         when(itemService.read(userId, itemId)).thenReturn(itemDto);
 

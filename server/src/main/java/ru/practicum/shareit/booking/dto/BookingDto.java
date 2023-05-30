@@ -8,8 +8,6 @@ import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.item.dto.ShortItemDto;
 import ru.practicum.shareit.user.dto.ShortUserDto;
 
-import javax.validation.constraints.FutureOrPresent;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Data
@@ -19,13 +17,8 @@ import java.time.LocalDateTime;
 public class BookingDto {
 
     private long id;
-    @NotNull
-    @FutureOrPresent
     private LocalDateTime start;
-    @NotNull
-    @FutureOrPresent
     private LocalDateTime end;
-    @NotNull
     private Long itemId;
 
     private BookingStatus status;

@@ -67,21 +67,6 @@ class UserControllerITest {
 
     @SneakyThrows
     @Test
-    void createWhenDtoNotValidThenReturnBadRequest() {
-        userDto.setEmail("mail123");
-
-        mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .content(objectMapper.writeValueAsString(userDto))
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-
-        verify(userService, never()).create(userDto);
-    }
-
-    @SneakyThrows
-    @Test
     void readWhenInvokeThenReturnOk() {
         when(userService.read(id)).thenReturn(userDto);
 

@@ -1,5 +1,6 @@
 version: '3.8'
 services:
+
   gateway:
     build: gateway
     image: shareit-gateway-image
@@ -26,7 +27,7 @@ services:
 
   db:
     image: postgres:13.7-alpine
-    container_name: shareit-db
+    container_name: shareit-db-container
     ports:
       - "6541:5432"
     environment:
